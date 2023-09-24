@@ -90,8 +90,8 @@ function Chat() {
                 placeholder="Введите сообщение"
                 variant="outlined"
                 value={input}
-                multiline
-                maxRows={4}
+                // multiline
+                // maxRows={4}
                 onChange={handleInputChange}
                 disabled={isLoadingMessage ? true : false}
               />
