@@ -4,10 +4,8 @@ import { useContext, useEffect, useRef, useState } from 'react'
 import { AuthContext } from '../context'
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from 'firebase/firestore'
 
-
 import Loader from './Loader'
 import LoaderButton from './LoaderButton'
-
 
 function Chat() {
   const [input, setInput] = useState('')
@@ -56,7 +54,6 @@ function Chat() {
   }
 
   const handleInputChange = (event) => {
-    console.log(event)
     event.preventDefault()
     setInput(event.target.value)
   }
@@ -128,10 +125,14 @@ function Chat() {
     </>
   )
 }
+function escapeHtml(unsafe) {
+  return unsafe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;')
+}
 
-const RawHTML = ({ children, className = '' }) => (
-  <div className={className} dangerouslySetInnerHTML={{ __html: children.replace(/\n/g, '<br />') }} />
-)
+const RawHTML = ({ children, className = '' }) => {
+  const escapeHtmlChildren = escapeHtml(children)
+  return <span className={className} dangerouslySetInnerHTML={{ __html: escapeHtmlChildren.replace(/\n/g, '<br />') }} />
+}
 
 const Message = ({ message }) => {
   let { user } = useContext(AuthContext)
