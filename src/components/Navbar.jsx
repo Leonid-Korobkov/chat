@@ -13,7 +13,6 @@ export default function Navbar() {
   let { auth, user } = useContext(AuthContext)
 
   return (
-    // sx={{ flexGrow: 1, position: 'fixed', left: 0, right: 0, zIndex: 1000 }
     <Box  sx={{ flexGrow: 1, flexShrink: 0}}>
       <AppBar position="static">
         <Toolbar>

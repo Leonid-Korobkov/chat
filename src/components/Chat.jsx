@@ -3,41 +3,40 @@ import SendIcon from '@mui/icons-material/Send'
 import { useContext, useEffect, useRef, useState } from 'react'
 import { AuthContext } from '../context'
 import { collection, addDoc, serverTimestamp, onSnapshot, query, orderBy } from 'firebase/firestore'
-// import { collection, query, where, onSnapshot } from "firebase/firestore";
+
 
 import Loader from './Loader'
 import LoaderButton from './LoaderButton'
 
-// import { collection, getDocs } from "firebase/firestore";
 
 function Chat() {
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState(null)
   const [isLoadingMessage, setIsLoadingMessage] = useState(false)
-  // const messegesRef = useRef(null)
+  const scrollRef = useRef(null)
+  const formRef = useRef(null)
   let { fireStore, user } = useContext(AuthContext)
 
   useEffect(() => {
     async function getMessages() {
       const q = query(collection(fireStore, 'messages'), orderBy('createAt'))
       onSnapshot(q, (querySnapshot) => {
-        const messages = []
+        const newMessages = []
         querySnapshot.forEach((doc) => {
-          messages.push(doc.data())
+          newMessages.push(doc.data())
         })
-        setMessages(messages)
-        // console.log(messegesRef.current.clientHeight)
-        // messegesRef.current.scrollTo({
-        //   top: document.body.scrollHeight,
-        //   left: 0,
-        //   behavior: 'smooth'
-        // });
+        setMessages(newMessages)
       })
     }
     getMessages()
   }, [])
 
+  useEffect(() => {
+    scrollRef.current.scrollIntoView({ behavior: 'smooth' })
+  })
+
   async function sendMessage(e) {
+    console.log(input)
     if (input.trim() !== '') {
       setIsLoadingMessage(true)
       try {
@@ -58,8 +57,19 @@ function Chat() {
   }
 
   const handleInputChange = (event) => {
+    console.log(event)
     event.preventDefault()
     setInput(event.target.value)
+  }
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault()
+      setInput(e.target.value + '\n')
+      return
+    } else if (e.key === 'Enter' && !e.shiftKey) {
+      sendMessage()
+    }
   }
 
   return (
@@ -76,12 +86,12 @@ function Chat() {
       >
         <Box sx={{ flexGrow: 1, p: 2 }}>
           {messages ? messages.map((message, index) => <Message key={message.createAt} message={message} />) : <Loader />}
-          {/* <div ref={messegesRef} /> */}
+          <div ref={scrollRef} />
         </Box>
       </Box>
       {/* sx={{ p: 2, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 1000, background: '#272727' } */}
       <Box sx={{ p: 2, flexShrink: 0, background: '#272727' }}>
-        <form action="#" name="chatForm">
+        <form ref={formRef} onSubmit={sendMessage} action="#" name="chatForm">
           <Grid container spacing={2} style={{ alignItems: 'center' }}>
             <Grid item style={{ flex: '1 1 auto' }}>
               <TextField
@@ -90,8 +100,9 @@ function Chat() {
                 placeholder="Введите сообщение"
                 variant="outlined"
                 value={input}
-                // multiline
-                // maxRows={4}
+                multiline
+                maxRows={4}
+                onKeyDown={handleKeyPress}
                 onChange={handleInputChange}
                 disabled={isLoadingMessage ? true : false}
               />
@@ -107,7 +118,7 @@ function Chat() {
                   <LoaderButton />
                 </Button>
               ) : (
-                <Button type="button" fullWidth color="primary" variant="contained" onClick={sendMessage}>
+                <Button type="submit" fullWidth color="primary" variant="contained">
                   <SendIcon />
                 </Button>
               )}
@@ -118,6 +129,10 @@ function Chat() {
     </>
   )
 }
+
+const RawHTML = ({ children, className = '' }) => (
+  <div className={className} dangerouslySetInnerHTML={{ __html: children.replace(/\n/g, '<br />') }} />
+)
 
 const Message = ({ message }) => {
   let { user } = useContext(AuthContext)
@@ -154,7 +169,8 @@ const Message = ({ message }) => {
           }}
         >
           <Typography style={{ wordBreak: 'break-word' }} variant="body1">
-            {message.text}
+            {/* <ReplacedString originalString={message.text} /> */}
+            <RawHTML>{message.text}</RawHTML>
           </Typography>
         </Paper>
       </Box>
