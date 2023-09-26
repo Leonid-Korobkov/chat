@@ -14,7 +14,6 @@ function Chat() {
   const [messages, setMessages] = useState(null)
   const [isLoadingMessage, setIsLoadingMessage] = useState(false)
   const scrollRef = useRef(null)
-  const formRef = useRef(null)
   let { fireStore, user } = useContext(AuthContext)
 
   useEffect(() => {
@@ -36,7 +35,7 @@ function Chat() {
   })
 
   async function sendMessage(e) {
-    console.log(input)
+    e.preventDefault()
     if (input.trim() !== '') {
       setIsLoadingMessage(true)
       try {
@@ -68,7 +67,7 @@ function Chat() {
       setInput(e.target.value + '\n')
       return
     } else if (e.key === 'Enter' && !e.shiftKey) {
-      sendMessage()
+      sendMessage(e)
     }
   }
 
@@ -91,7 +90,7 @@ function Chat() {
       </Box>
       {/* sx={{ p: 2, position: 'fixed', left: 0, right: 0, bottom: 0, zIndex: 1000, background: '#272727' } */}
       <Box sx={{ p: 2, flexShrink: 0, background: '#272727' }}>
-        <form ref={formRef} onSubmit={sendMessage} action="#" name="chatForm">
+        <form onSubmit={sendMessage} action="#" name="chatForm">
           <Grid container spacing={2} style={{ alignItems: 'center' }}>
             <Grid item style={{ flex: '1 1 auto' }}>
               <TextField
@@ -114,7 +113,7 @@ function Chat() {
             </div>
             <Grid item>
               {isLoadingMessage ? (
-                <Button disabled type="button" fullWidth color="primary" variant="contained" onClick={sendMessage}>
+                <Button disabled type="button" fullWidth color="primary" variant="contained">
                   <LoaderButton />
                 </Button>
               ) : (
